@@ -48,6 +48,6 @@ func (a *App) initDeps() error {
 
 	a.Db = db
 	a.Router = gin.Default()
-	v1.Setup(a.Env, a.Db, a.Router)
+	v1.Setup(a.Db, a.Router)
 	return nil
 }
