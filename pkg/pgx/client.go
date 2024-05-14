@@ -1,23 +1,16 @@
 package pgx
 
 import (
-	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
-func NewClient(host, port, username, password, database string) (*sql.DB, error) {
+func NewDb(host, port, username, password, database string) (*sqlx.DB, error) {
 	config := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, database)
-
-	sqlDB, err := sql.Open("pgx", config)
+	db, err := sqlx.Connect("postgres", config)
 	if err != nil {
 		return nil, err
 	}
-
-	err = sqlDB.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	return sqlDB, nil
+	return db, nil
 }
