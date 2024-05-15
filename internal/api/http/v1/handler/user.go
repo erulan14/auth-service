@@ -2,7 +2,7 @@ package handler
 
 import (
 	"auth-service/internal/api/http/v1/dto"
-	user_usercase "auth-service/internal/domain/dto"
+	user_usercase "auth-service/internal/domain/convertor"
 	"auth-service/internal/domain/entity"
 	"context"
 	"github.com/gin-gonic/gin"

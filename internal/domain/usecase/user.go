@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"auth-service/internal/domain/dto"
+	"auth-service/internal/domain/convertor"
 	"auth-service/internal/domain/entity"
 	"context"
 	"github.com/google/uuid"
@@ -16,23 +16,23 @@ type UserRepository interface {
 	Delete(ctx context.Context, id string) error
 }
 
-type userUsecase struct {
+type user struct {
 	repository UserRepository
 }
 
-func NewUserUseCase(repository UserRepository) *userUsecase {
-	return &userUsecase{repository: repository}
+func NewUser(repository UserRepository) *user {
+	return &user{repository: repository}
 }
 
-func (s *userUsecase) GetById(ctx context.Context, id string) (entity.User, error) {
+func (s *user) GetById(ctx context.Context, id string) (entity.User, error) {
 	return s.repository.GetById(ctx, id)
 }
 
-func (s *userUsecase) GetAll(ctx context.Context) ([]entity.User, error) {
+func (s *user) GetAll(ctx context.Context) ([]entity.User, error) {
 	return s.repository.GetAll(ctx)
 }
 
-func (s *userUsecase) Create(ctx context.Context, user dto.CreateUserDTO) (string, error) {
+func (s *user) Create(ctx context.Context, user convertor.CreateUserDTO) (string, error) {
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
 		return "", err
@@ -60,11 +60,11 @@ func (s *userUsecase) Create(ctx context.Context, user dto.CreateUserDTO) (strin
 	return newUUID.String(), nil
 }
 
-func (s *userUsecase) Update(ctx context.Context, user dto.UpdateUserDTO) (string, error) {
+func (s *user) Update(ctx context.Context, user convertor.UpdateUserDTO) (string, error) {
 
 	return "", nil
 }
 
-func (s *userUsecase) Delete(ctx context.Context, id string) error {
+func (s *user) Delete(ctx context.Context, id string) error {
 	return s.repository.Delete(ctx, id)
 }

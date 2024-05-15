@@ -22,8 +22,10 @@ func TestUser_GetById(t *testing.T) {
 			"created_at", "updated_at"}).AddRow(
 		"1", "Test", "123456", "Ulan", "abdraman",
 		"ulan@gmail.com", "+7787764654", true, false, false, time.Now(), time.Now())
+
 	query := `SELECT (.*) FROM "user" WHERE id = \\?`
 	mock.ExpectQuery(query).WillReturnRows(rows)
+
 	a := NewUser(db)
 
 	anUser, err := a.GetById(context.TODO(), "1")
@@ -52,7 +54,9 @@ func TestUser_GetAll(t *testing.T) {
 
 	query := `SELECT (.*) FROM "user"`
 	mock.ExpectQuery(query).WillReturnRows(rows)
+
 	a := NewUser(db)
+
 	anUsers, err := a.GetAll(context.TODO())
 
 	assert.NoError(t, err)
