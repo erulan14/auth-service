@@ -28,7 +28,8 @@ func NewUser(db *sqlx.DB) *user {
 
 func (s *user) GetByUserName(ctx context.Context, username string) (model.User, error) {
 	var repoModel model.User
-	err := s.db.GetContext(ctx, &repoModel, `SELECT * FROM "user" WHERE username = $1`, username)
+	err := s.db.GetContext(ctx, &repoModel,
+		`SELECT * FROM "user" WHERE is_deleted=FALSE AND username = $1`, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return model.User{}, errors.New(ErrUserNotFound)
@@ -40,7 +41,8 @@ func (s *user) GetByUserName(ctx context.Context, username string) (model.User, 
 
 func (s *user) GetById(ctx context.Context, id string) (model.User, error) {
 	var repoModel model.User
-	err := s.db.GetContext(ctx, &repoModel, `SELECT * FROM "user" WHERE id=$1 AND is_deleted=FALSE`, id)
+	err := s.db.GetContext(ctx, &repoModel,
+		`SELECT * FROM "user" WHERE is_deleted=FALSE AND id=$1`, id)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -54,7 +56,8 @@ func (s *user) GetById(ctx context.Context, id string) (model.User, error) {
 
 func (s *user) GetAll(ctx context.Context) ([]model.User, error) {
 	var repoUsers []model.User
-	err := s.db.SelectContext(ctx, &repoUsers, `SELECT * FROM "user" WHERE is_deleted=FALSE`)
+	err := s.db.SelectContext(ctx, &repoUsers,
+		`SELECT * FROM "user" WHERE is_deleted=false`)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return make([]model.User, 0), errors.Join(errors.New(ErrUserNotFound), err)
@@ -67,8 +70,9 @@ func (s *user) GetAll(ctx context.Context) ([]model.User, error) {
 func (s *user) Create(ctx context.Context, user model.CreateUser) (string, error) {
 	var id string
 
-	err := s.db.QueryRowContext(ctx, `INSERT INTO "user" (username, password) 
-		VALUES ($1, $2) RETURNING id;`, &user.Username, &user.Password).Scan(&id)
+	err := s.db.QueryRowContext(ctx,
+		`INSERT INTO "user" (username, password) VALUES ($1, $2) RETURNING id`,
+		&user.Username, &user.Password).Scan(&id)
 	if err != nil {
 		return "", errors.Join(errors.New(ErrCreateFailed), err)
 	}
@@ -92,7 +96,8 @@ func (s *user) Update(ctx context.Context, id string, user model.UpdateUser) err
 }
 
 func (s *user) Delete(ctx context.Context, id string) error {
-	_, err := s.db.ExecContext(ctx, `UPDATE "user" SET is_deleted = $2 WHERE id = $1`, id, true)
+	_, err := s.db.ExecContext(ctx,
+		`UPDATE "user" SET is_deleted = $2 WHERE id = $1`, id, true)
 	if err != nil {
 		return errors.Join(errors.New(ErrDeleteFailed), err)
 	}
