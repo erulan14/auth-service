@@ -64,16 +64,9 @@ func TestUser_GetAll(t *testing.T) {
 }
 
 func TestUser_Create(t *testing.T) {
-	user := model.User{
-		Username:    "Test",
-		Password:    "123456",
-		FirstName:   "Test",
-		LastName:    "Test",
-		Email:       "test@test.com",
-		Phone:       "+787686",
-		IsSuperuser: true,
-		IsStaff:     true,
-		IsActive:    true,
+	user := model.CreateUser{
+		Username: "Test",
+		Password: "123456",
 	}
 
 	db, mock, err := sqlxmock.Newx()
@@ -81,16 +74,10 @@ func TestUser_Create(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	query := `INSERT INTO "user" 
-    \(username, password, first_name, 
-    last_name, email, phone, is_superuser, 
-    is_staff, is_active\) 
-    VALUES \(\?, \?, \?, \?, \?, \?, \?, \?, \?\)`
+	query := `INSERT INTO "user" \(username, password\) VALUES \(\?, \?\)`
 
 	mock.ExpectExec(query).
-		WithArgs(user.Username, user.Password,
-			user.FirstName, user.LastName, user.Email, user.Phone,
-			user.IsSuperuser, user.IsStaff, user.IsActive).
+		WithArgs(user.Username, user.Password).
 		WillReturnResult(sqlxmock.NewResult(1, 1))
 
 	a := NewUser(db)

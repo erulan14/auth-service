@@ -8,7 +8,7 @@ import (
 
 func NewDb(host, port, username, password, database string) (*sqlx.DB, error) {
 	config := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", username, password, host, port, database)
-	db, err := sqlx.Connect("postgres", config)
+	db, err := sqlx.Connect("pgx", config)
 	if err != nil {
 		return nil, err
 	}

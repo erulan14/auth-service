@@ -2,11 +2,13 @@ package v1
 
 import (
 	"auth-service/internal/api/http/v1/route"
-	"database/sql"
+	"auth-service/pkg/env"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 )
 
-func Setup(db *sql.DB, gin *gin.Engine) {
+func Setup(env *env.Env, db *sqlx.DB, gin *gin.Engine) {
 	publicRouter := gin.Group("/")
-	route.NewUserRouter(db, publicRouter)
+	route.NewUser(db, publicRouter)
+	route.NewAuth(env, db, publicRouter)
 }

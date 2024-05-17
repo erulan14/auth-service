@@ -7,6 +7,7 @@ import (
 
 type Env struct {
 	AppEnv         string `mapstructure:"APP_ENV"`
+	Secret         string `mapstructure:"SECRET"`
 	Port           string `mapstructure:"PORT"`
 	ContextTimeout int    `mapstructure:"CONTEXT_TIMEOUT"`
 	DBHost         string `mapstructure:"DB_HOST"`

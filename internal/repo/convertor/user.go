@@ -3,11 +3,19 @@ package convertor
 import (
 	"auth-service/internal/domain/entity"
 	"auth-service/internal/repo/model"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func ToRepoModel(user *entity.User) *model.User {
-	return &model.User{
-		ID:          user.ID,
+func ToRepoModelCreate(user entity.CreateUser) model.CreateUser {
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	return model.CreateUser{
+		Username: user.Username,
+		Password: string(hashPassword),
+	}
+}
+
+func ToRepoModelUpdate(user entity.UpdateUser) model.UpdateUser {
+	return model.UpdateUser{
 		Username:    user.Username,
 		Password:    user.Password,
 		FirstName:   user.FirstName,
@@ -17,24 +25,5 @@ func ToRepoModel(user *entity.User) *model.User {
 		IsActive:    user.IsActive,
 		IsSuperuser: user.IsSuperUser,
 		IsStaff:     user.IsStaff,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
-}
-
-func ToEntityModel(user *model.User) *entity.User {
-	return &entity.User{
-		ID:          user.ID,
-		Username:    user.Username,
-		Password:    user.Password,
-		FirstName:   user.FirstName,
-		LastName:    user.LastName,
-		Email:       user.Email,
-		PhoneNumber: user.Phone,
-		IsActive:    user.IsActive,
-		IsSuperUser: user.IsSuperuser,
-		IsStaff:     user.IsStaff,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
 	}
 }

@@ -5,19 +5,17 @@ import (
 	"auth-service/internal/domain/service"
 	"auth-service/internal/domain/usecase"
 	"auth-service/internal/repo"
+	"auth-service/pkg/env"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
-func NewUser(db *sqlx.DB, gin *gin.RouterGroup) {
+func NewAuth(env *env.Env, db *sqlx.DB, gin *gin.RouterGroup) {
 	ur := repo.NewUser(db)
 	us := service.NewUser(ur)
-	uc := usecase.NewUser(us)
-	pc := handler.NewUser(uc)
-	user := gin.Group("/user")
-	user.GET("/", pc.GetAll)
-	user.GET("/:id", pc.GetById)
-	user.POST("/", pc.Create)
-	user.PUT("/:id", pc.Update)
-	user.DELETE("/:id", pc.Delete)
+	au := usecase.NewAuth(env, us)
+	pc := handler.NewAuth(au)
+	auth := gin.Group("/auth")
+	auth.POST("/login", pc.Login)
+	auth.POST("/verify", pc.Verify)
 }
