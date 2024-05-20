@@ -15,6 +15,7 @@ type Env struct {
 	DBUser         string `mapstructure:"DB_USER"`
 	DBPass         string `mapstructure:"DB_PASS"`
 	DBName         string `mapstructure:"DB_NAME"`
+	GIN_MODE       string `mapstructure:"GIN_MODE"`
 }
 
 func NewEnv() *Env {

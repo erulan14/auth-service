@@ -9,7 +9,7 @@ type User struct {
 	FirstName   string
 	LastName    string
 	Email       string
-	PhoneNumber string
+	Phone       string
 	IsSuperUser bool
 	IsStaff     bool
 	IsActive    bool
@@ -28,7 +28,7 @@ type UpdateUser struct {
 	FirstName   string
 	LastName    string
 	Email       string
-	PhoneNumber string
+	Phone       string
 	IsSuperUser bool
 	IsStaff     bool
 	IsActive    bool

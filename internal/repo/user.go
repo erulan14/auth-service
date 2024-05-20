@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 const (
@@ -82,12 +83,13 @@ func (s *user) Create(ctx context.Context, user model.CreateUser) (string, error
 
 func (s *user) Update(ctx context.Context, id string, user model.UpdateUser) error {
 	user.ID = id
+	log.Println(user)
 	_, err := s.db.NamedExecContext(ctx, `UPDATE "user" SET 
                   username = :username, password = :password, 
                   first_name = :first_name, last_name = :last_name,
                   email = :email, phone = :phone, 
                   is_active = :is_active, is_staff = :is_staff, 
-                  is_superuser=:is_superuser WHERE id = :id`, &user)
+                  is_superuser=:is_superuser, updated_at=:updated_at WHERE id = :id`, &user)
 
 	if err != nil {
 		return errors.Join(errors.New(ErrUpdateFailed), err)

@@ -12,6 +12,81 @@ import (
 	"time"
 )
 
+func TestUser_Update(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+	updatedUser := entity.UpdateUser{
+		Username:    "miko",
+		Password:    "lux12345",
+		FirstName:   "Miko",
+		LastName:    "Aio",
+		Email:       "miko@gmail.com",
+		Phone:       "+77007007070",
+		IsActive:    false,
+		IsSuperUser: false,
+		IsStaff:     false,
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.Anything).
+			Return(nil).
+			Once()
+
+		u := NewUser(mockUserRepo)
+		err := u.Update(context.TODO(), "1", updatedUser)
+
+		assert.NoError(t, err)
+		mockUserRepo.AssertExpectations(t)
+	})
+
+	t.Run("error-failed", func(t *testing.T) {
+		mockUserRepo.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.Anything).
+			Return(errors.New("unexpected")).
+			Once()
+
+		u := NewUser(mockUserRepo)
+		err := u.Update(context.TODO(), "1", updatedUser)
+		assert.Error(t, err)
+		mockUserRepo.AssertExpectations(t)
+	})
+}
+
+func TestUser_Create(t *testing.T) {
+	mockUserRepo := new(mocks.UserRepository)
+	createdUser := entity.CreateUser{
+		Username: "yuki",
+		Password: "pass1234",
+	}
+
+	t.Run("success", func(t *testing.T) {
+		mockUserRepo.On("Create", mock.Anything, mock.Anything).
+			Return("test", nil).
+			Once()
+
+		u := NewUser(mockUserRepo)
+		id, err := u.Create(context.TODO(), createdUser)
+		if err != nil {
+			return
+		}
+
+		assert.NotNil(t, id)
+		assert.NoError(t, err)
+
+		mockUserRepo.AssertExpectations(t)
+	})
+
+	t.Run("error-failed", func(t *testing.T) {
+		mockUserRepo.On("Create", mock.Anything, mock.Anything).
+			Return("test", errors.New("unexpected")).Once()
+
+		u := NewUser(mockUserRepo)
+		id, err := u.Create(context.TODO(), createdUser)
+		assert.Error(t, err)
+		assert.Equal(t, "", id)
+
+		mockUserRepo.AssertExpectations(t)
+	})
+}
+
 func TestUser_GetAll(t *testing.T) {
 	//mockUserRepo := new(mocks.UserRepository)
 

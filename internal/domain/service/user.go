@@ -6,6 +6,16 @@ import (
 	repo_convertor "auth-service/internal/repo/convertor"
 	"auth-service/internal/repo/model"
 	"context"
+	"errors"
+)
+
+const (
+	ErrGetByUserName = "Failed to get user by name: "
+	ErrGetByIDFailed = "Failed to get user by id: "
+	ErrGetAllFailed  = "Failed to get all users: "
+	ErrCreateFailed  = "Failed to create user: "
+	ErrUpdateFailed  = "Failed to update user: "
+	ErrDeleteFailed  = "Failed to delete user: "
 )
 
 type UserRepository interface {
@@ -29,7 +39,7 @@ func (s *user) GetByUserName(ctx context.Context, username string) (entity.User,
 	repoModel, err := s.repository.GetByUserName(ctx, username)
 
 	if err != nil {
-		return entity.User{}, err
+		return entity.User{}, errors.Join(errors.New(ErrGetByUserName), err)
 	}
 
 	return convertor.ToEntityModel(repoModel), nil
@@ -39,7 +49,7 @@ func (s *user) GetById(ctx context.Context, id string) (entity.User, error) {
 	repoModel, err := s.repository.GetById(ctx, id)
 
 	if err != nil {
-		return entity.User{}, err
+		return entity.User{}, errors.Join(errors.New(ErrGetByIDFailed), err)
 	}
 
 	return convertor.ToEntityModel(repoModel), nil
@@ -49,7 +59,7 @@ func (s *user) GetAll(ctx context.Context) ([]entity.User, error) {
 	repoModels, err := s.repository.GetAll(ctx)
 
 	if err != nil {
-		return []entity.User{}, err
+		return []entity.User{}, errors.Join(errors.New(ErrGetAllFailed), err)
 	}
 
 	entities := make([]entity.User, len(repoModels))
@@ -63,14 +73,13 @@ func (s *user) GetAll(ctx context.Context) ([]entity.User, error) {
 func (s *user) Create(ctx context.Context, user entity.CreateUser) (string, error) {
 	id, err := s.repository.Create(ctx, repo_convertor.ToRepoModelCreate(user))
 	if err != nil {
-		return "", err
+		return "", errors.Join(errors.New(ErrCreateFailed), err)
 	}
 	return id, nil
 }
 
 func (s *user) Update(ctx context.Context, id string, user entity.UpdateUser) error {
-
-	return nil
+	return s.repository.Update(ctx, id, repo_convertor.ToRepoModelUpdate(user))
 }
 
 func (s *user) Delete(ctx context.Context, id string) error {

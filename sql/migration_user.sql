@@ -10,6 +10,6 @@ CREATE TABLE "user" (
     is_staff bool NOT NULL DEFAULT FALSE,
     is_active bool NOT NULL DEFAULT FALSE,
     created_at timestamptz NOT NULL DEFAULT NOW(),
-    updated_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT current_timestamp,
     is_deleted bool NOT NULL DEFAULT FALSE
 )

@@ -4,14 +4,13 @@ import (
 	v1 "auth-service/internal/api/http/v1"
 	"auth-service/pkg/env"
 	"auth-service/pkg/pgx"
-	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
 type App struct {
-	Env    *env.Env
-	Router *gin.Engine
-	Db     *sqlx.DB
+	env    *env.Env
+	server *v1.Server
+	db     *sqlx.DB
 }
 
 func NewApp() (*App, error) {
@@ -26,9 +25,9 @@ func NewApp() (*App, error) {
 }
 
 func (a *App) Run() error {
-	defer a.Db.Close()
+	defer a.db.Close()
 
-	err := a.Router.Run(a.Env.Port)
+	err := a.server.Run()
 	if err != nil {
 		return err
 	}
@@ -37,17 +36,16 @@ func (a *App) Run() error {
 }
 
 func (a *App) initDeps() error {
-	a.Env = env.NewEnv()
+	a.env = env.NewEnv()
 
-	db, err := pgx.NewDb(a.Env.DBHost, a.Env.DBPort,
-		a.Env.DBUser, a.Env.DBPass, a.Env.DBName)
-
+	var err error
+	a.db, err = pgx.NewDb(a.env.DBHost, a.env.DBPort,
+		a.env.DBUser, a.env.DBPass, a.env.DBName)
 	if err != nil {
 		return err
 	}
+	a.server = v1.NewServer(a.env)
+	a.server.Setup(a.db)
 
-	a.Db = db
-	a.Router = gin.Default()
-	v1.Setup(a.Env, a.Db, a.Router)
 	return nil
 }

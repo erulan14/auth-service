@@ -12,7 +12,7 @@ func ToHandlerModel(user entity.User) model.User {
 		FirstName:   user.FirstName,
 		LastName:    user.LastName,
 		Email:       user.Email,
-		Phone:       user.PhoneNumber,
+		Phone:       user.Phone,
 		IsActive:    user.IsActive,
 		IsSuperuser: user.IsSuperUser,
 		IsStaff:     user.IsStaff,

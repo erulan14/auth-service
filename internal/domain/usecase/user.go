@@ -38,7 +38,7 @@ func (s *user) Create(ctx context.Context, user entity.CreateUser) (string, erro
 }
 
 func (s *user) Update(ctx context.Context, id string, user entity.UpdateUser) error {
-	return nil
+	return s.userService.Update(ctx, id, user)
 }
 
 func (s *user) Delete(ctx context.Context, id string) error {

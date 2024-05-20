@@ -56,6 +56,7 @@ func (uc *userHandler) Create(ctx *gin.Context) {
 	var createUser model.CreateUser
 	if err := ctx.ShouldBind(&createUser); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	id, err := uc.userUseCase.Create(ctx.Request.Context(), domain_convertor.ToEntityCreateModel(createUser))
@@ -68,7 +69,19 @@ func (uc *userHandler) Create(ctx *gin.Context) {
 }
 
 func (uc *userHandler) Update(ctx *gin.Context) {
+	var updateUser model.UpdateUser
+	if err := ctx.ShouldBind(&updateUser); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
+	id := ctx.Param("id")
+	err := uc.userUseCase.Update(ctx.Request.Context(), id, domain_convertor.ToEntityUpdateModel(updateUser))
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
 func (uc *userHandler) Delete(ctx *gin.Context) {

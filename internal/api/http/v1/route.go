@@ -7,8 +7,33 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func Setup(env *env.Env, db *sqlx.DB, gin *gin.Engine) {
-	publicRouter := gin.Group("/")
-	route.NewUser(db, publicRouter)
-	route.NewAuth(env, db, publicRouter)
+type Server struct {
+	engine *gin.Engine
+	env    *env.Env
+}
+
+func NewServer(env *env.Env) *Server {
+	gin.SetMode(env.GIN_MODE)
+	engine := gin.Default()
+	err := engine.SetTrustedProxies(nil)
+	if err != nil {
+		return nil
+	}
+
+	engine.Use(gin.Logger())
+
+	return &Server{
+		engine: engine,
+		env:    env,
+	}
+}
+
+func (s *Server) Setup(db *sqlx.DB) {
+	api := s.engine.Group("/api/")
+	route.NewUser(db, api)
+	route.NewAuth(s.env, db, api)
+}
+
+func (s *Server) Run() error {
+	return s.engine.Run(s.env.Port)
 }
