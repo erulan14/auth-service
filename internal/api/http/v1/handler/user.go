@@ -18,16 +18,17 @@ type UserUseCase interface {
 	Delete(ctx context.Context, id string) error
 }
 
-type userHandler struct {
+type user struct {
 	userUseCase UserUseCase
 }
 
-func NewUser(userUseCase UserUseCase) *userHandler {
-	return &userHandler{userUseCase: userUseCase}
+func NewUser(userUseCase UserUseCase) *user {
+	return &user{userUseCase: userUseCase}
 }
 
-func (uc *userHandler) GetById(ctx *gin.Context) {
+func (uc *user) GetById(ctx *gin.Context) {
 	id := ctx.Param("id")
+
 	user, err := uc.userUseCase.GetById(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -37,7 +38,7 @@ func (uc *userHandler) GetById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, convertor.ToHandlerModel(user))
 }
 
-func (uc *userHandler) GetAll(ctx *gin.Context) {
+func (uc *user) GetAll(ctx *gin.Context) {
 	users, err := uc.userUseCase.GetAll(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -52,7 +53,7 @@ func (uc *userHandler) GetAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, handlerUsers)
 }
 
-func (uc *userHandler) Create(ctx *gin.Context) {
+func (uc *user) Create(ctx *gin.Context) {
 	var createUser model.CreateUser
 	if err := ctx.ShouldBind(&createUser); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -68,7 +69,7 @@ func (uc *userHandler) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, id)
 }
 
-func (uc *userHandler) Update(ctx *gin.Context) {
+func (uc *user) Update(ctx *gin.Context) {
 	var updateUser model.UpdateUser
 	if err := ctx.ShouldBind(&updateUser); err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -81,15 +82,18 @@ func (uc *userHandler) Update(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 
-func (uc *userHandler) Delete(ctx *gin.Context) {
+func (uc *user) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
+
 	err := uc.userUseCase.Delete(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
