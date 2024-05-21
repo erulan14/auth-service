@@ -2,11 +2,11 @@ package repo
 
 import (
 	"auth-service/internal/repo/model"
+	"auth-service/pkg/logger"
 	"context"
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 const (
@@ -28,11 +28,13 @@ func NewUser(db *sqlx.DB) *user {
 }
 
 func (s *user) GetByUserName(ctx context.Context, username string) (model.User, error) {
+	log := logger.GetLogger()
 	var repoModel model.User
 	err := s.db.GetContext(ctx, &repoModel,
 		`SELECT * FROM "user" WHERE is_deleted=FALSE AND username = $1`, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			log.Error(errors.Join(errors.New(ErrUserNotFound), err))
 			return model.User{}, errors.New(ErrUserNotFound)
 		}
 		return model.User{}, errors.Join(errors.New(ErrGetByUserName), err)
@@ -83,7 +85,6 @@ func (s *user) Create(ctx context.Context, user model.CreateUser) (string, error
 
 func (s *user) Update(ctx context.Context, id string, user model.UpdateUser) error {
 	user.ID = id
-	log.Println(user)
 	_, err := s.db.NamedExecContext(ctx, `UPDATE "user" SET 
                   username = :username, password = :password, 
                   first_name = :first_name, last_name = :last_name,

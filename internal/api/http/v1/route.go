@@ -3,8 +3,10 @@ package v1
 import (
 	"auth-service/internal/api/http/v1/route"
 	"auth-service/pkg/env"
+	"auth-service/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
+	ginlogrus "github.com/toorop/gin-logrus"
 )
 
 type Server struct {
@@ -20,7 +22,9 @@ func NewServer(env *env.Env) *Server {
 		return nil
 	}
 
-	engine.Use(gin.Logger())
+	log := logger.GetLogger()
+
+	engine.Use(ginlogrus.Logger(log), gin.Recovery())
 
 	return &Server{
 		engine: engine,

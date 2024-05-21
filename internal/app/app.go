@@ -3,6 +3,7 @@ package app
 import (
 	v1 "auth-service/internal/api/http/v1"
 	"auth-service/pkg/env"
+	"auth-service/pkg/logger"
 	"auth-service/pkg/pgx"
 	"github.com/jmoiron/sqlx"
 )
@@ -14,6 +15,10 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
+	logger.Init()
+	log := logger.GetLogger()
+	log.Println("logger initialized")
+
 	a := App{}
 	err := a.initDeps()
 
