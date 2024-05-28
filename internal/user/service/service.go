@@ -4,6 +4,8 @@ import (
 	"auth-service/internal/user/model"
 	"auth-service/internal/user/storage"
 	"context"
+	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type Service interface {
@@ -25,9 +27,11 @@ func NewService(storage storage.Storage) Service {
 }
 
 func (s *service) Create(ctx context.Context, req model.CreateUserRequest) (string, error) {
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+
 	user := model.User{
 		Username: req.Username,
-		Password: req.Password,
+		Password: string(hashPassword),
 	}
 
 	create, err := s.storage.Create(ctx, user)
@@ -50,6 +54,7 @@ func (s *service) Update(ctx context.Context, id string, req model.UpdateUserReq
 		IsActive:  req.IsActive,
 		IsStaff:   req.IsStaff,
 		IsSuper:   req.IsSuper,
+		UpdatedAt: time.Now(),
 	}
 
 	err := s.storage.Update(ctx, user)
@@ -68,6 +73,7 @@ func (s *service) Update(ctx context.Context, id string, req model.UpdateUserReq
 		IsActive:  user.IsActive,
 		IsStaff:   user.IsStaff,
 		IsSuper:   user.IsSuper,
+		UpdatedAt: user.UpdatedAt,
 	}
 
 	return userResponse, nil
@@ -89,6 +95,8 @@ func (s *service) GetByID(ctx context.Context, id string) (model.UserResponse, e
 		IsActive:  user.IsActive,
 		IsStaff:   user.IsStaff,
 		IsSuper:   user.IsSuper,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 
 	return userResponse, nil
@@ -113,6 +121,8 @@ func (s *service) GetAll(ctx context.Context) ([]model.UserResponse, error) {
 			IsActive:  user.IsActive,
 			IsStaff:   user.IsStaff,
 			IsSuper:   user.IsSuper,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
 		}
 	}
 
