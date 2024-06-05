@@ -13,3 +13,5 @@ CREATE TABLE "user" (
     updated_at timestamptz NOT NULL DEFAULT current_timestamp,
     is_deleted bool NOT NULL DEFAULT FALSE
 )
+
+

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 type Storage struct {
@@ -45,6 +44,21 @@ func (s *Storage) Update(ctx context.Context, user model.User) error {
 	return nil
 }
 
+func (s *Storage) GetByUsername(ctx context.Context, username string) (model.User, error) {
+	var user model.User
+	err := s.DB.GetContext(ctx, &user,
+		`SELECT * FROM "user" WHERE is_deleted=FALSE AND username=$1`, username)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.User{}, fmt.Errorf("user not found")
+		}
+		return model.User{}, fmt.Errorf("storage: get user, %w", err)
+	}
+
+	return user, nil
+}
+
 func (s *Storage) GetByID(ctx context.Context, id string) (model.User, error) {
 	var user model.User
 	err := s.DB.GetContext(ctx, &user,
@@ -64,7 +78,6 @@ func (s *Storage) GetAll(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	err := s.DB.SelectContext(ctx, &users,
 		`SELECT * FROM "user" WHERE is_deleted=false`)
-	log.Println(err)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return make([]model.User, 0), fmt.Errorf("no users found")

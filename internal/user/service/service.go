@@ -12,6 +12,7 @@ type Service interface {
 	Create(ctx context.Context, user model.CreateUserRequest) (string, error)
 	Update(ctx context.Context, id string, user model.UpdateUserRequest) (model.UserResponse, error)
 	GetByID(ctx context.Context, id string) (model.UserResponse, error)
+	GetByUsername(ctx context.Context, username string) (model.User, error)
 	GetAll(ctx context.Context) ([]model.UserResponse, error)
 	Delete(ctx context.Context, id string) error
 }
@@ -77,6 +78,15 @@ func (s *service) Update(ctx context.Context, id string, req model.UpdateUserReq
 	}
 
 	return userResponse, nil
+}
+
+func (s *service) GetByUsername(ctx context.Context, username string) (model.User, error) {
+	user, err := s.storage.GetByUsername(ctx, username)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return user, nil
 }
 
 func (s *service) GetByID(ctx context.Context, id string) (model.UserResponse, error) {
