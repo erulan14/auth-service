@@ -2,16 +2,20 @@ package main
 
 import (
 	"auth-service/internal/app"
+	"auth-service/internal/config"
 	"log"
 )
 
 func main() {
-	a, err := app.NewApp()
+	env := config.NewEnv()
+	application := app.New()
+
+	err := application.Setup(env)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = a.Run()
+	err = application.Run(env.Server)
 	if err != nil {
 		log.Fatal(err)
 	}

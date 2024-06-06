@@ -1,53 +1,73 @@
 package app
 
 import (
-	v1 "auth-service/internal/api/http/v1"
-	"auth-service/pkg/env"
-	"auth-service/pkg/pgx"
-	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
+
+	"auth-service/internal/config"
+	userH "auth-service/internal/user/handler"
+	userS "auth-service/internal/user/service"
+	userPG "auth-service/internal/user/storage/pg"
+
+	authH "auth-service/internal/auth/handler"
+	authS "auth-service/internal/auth/service"
+	authU "auth-service/internal/usecase"
 )
 
 type App struct {
-	Env    *env.Env
-	Router *gin.Engine
-	Db     *sql.DB
+	db     *sqlx.DB
+	server *gin.Engine
 }
 
-func NewApp() (*App, error) {
+func New() *App {
 	a := App{}
-	err := a.initDeps()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &a, nil
+	return &a
 }
 
-func (a *App) Run() error {
-	defer a.Db.Close()
+func (a *App) Run(server config.Server) error {
+	return a.server.Run(server.Port)
+}
 
-	err := a.Router.Run(a.Env.Port)
+func (a *App) Setup(env *config.Env) error {
+	err := a.initDb(env.Db)
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (a *App) initDeps() error {
-	a.Env = env.NewEnv()
-
-	db, err := pgx.NewClient(a.Env.DBHost, a.Env.DBPort,
-		a.Env.DBUser, a.Env.DBPass, a.Env.DBName)
-
+	err = a.initServer(env.Server)
 	if err != nil {
 		return err
 	}
+	a.initDeps(env.Server)
 
-	a.Db = db
-	a.Router = gin.Default()
-	v1.Setup(a.Env, a.Db, a.Router)
 	return nil
+}
+
+func (a *App) initDeps(config config.Server) {
+	router := a.server.Group("/" + config.Path)
+
+	userStorage := userPG.NewStorage(a.db)
+	userService := userS.NewService(userStorage)
+	userHandler := userH.NewHandler(userService)
+	userHandler.Register(router)
+
+	authService := authS.NewService(config.Secret)
+	authUseCase := authU.NewUseCase(userService, authService)
+	authHandler := authH.NewHandler(authUseCase)
+	authHandler.Register(router)
+}
+
+func (a *App) initServer(config config.Server) error {
+	gin.SetMode(config.GinMode)
+	a.server = gin.Default()
+	return nil
+}
+
+func (a *App) initDb(config config.Db) (err error) {
+	a.db, err = sqlx.Connect("pgx",
+		fmt.Sprintf("postgresql://%s:%s@%s:%s/%s",
+			config.User, config.Pass, config.Host, config.Port, config.Name))
+	return err
 }
